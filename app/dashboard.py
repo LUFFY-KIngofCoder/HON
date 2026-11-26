@@ -136,6 +136,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** 2016 completely dominates the dataset with **489 out of 497 records (98.4%)**. Years 2012–2015 contribute only 1–3 records each — these are historical back-entries, not full-year data, making 2016 the only analytically representative year.")
 
     with col_t2:
         # UC1 Question 2: Year Box Plot confirming extreme skew towards 2016
@@ -155,6 +156,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** The box plot's median sits at **2016** and the whiskers barely reach back to 2012. This visually proves the extreme right skew — the distribution is not spread across years; it is almost entirely a single-year snapshot of Chicago crime in 2016.")
 
     st.caption("ℹ️ **Data Diagnostic Note:** 2016 represents **98.4%** of all records (489 / 497). Years 2012–2015 act as statistical outliers representing historical back-entries.")
     st.divider()
@@ -184,6 +186,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** Crime volume is essentially flat from 2012–2015 (1–3 incidents each) then surges to **489 in 2016 (98.4%)**. The apparent upward trend is purely a data-collection artifact — 2016 is the primary recording year, not evidence of a crime spike.")
 
     with col_u2_2:
         # UC2 Task 2: Top 10 Crime Types Horizontal Bar
@@ -203,6 +206,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** **Theft (21.1%)** and **Battery (17.1%)** alone account for over 1 in 3 crimes. The top 3 categories (Theft, Battery, Criminal Damage) represent **48%** of all incidents — a classic Pareto pattern where a small number of crime types drive the majority of police workload.")
 
     # UC2 Row 2: Arrest Outcome Donut & Month vs DayOfWeek Heatmap
     col_u2_3, col_u2_4 = st.columns(2)
@@ -232,6 +236,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** Only **1 in 4 crimes (24.9%)** results in an arrest. This low clearance rate suggests that most crimes — especially Theft and Criminal Damage — are reported but go unresolved, pointing to resource constraints or insufficient evidence at the scene.")
 
     with col_u2_4:
         # UC2 Task 4: Heatmap Month vs DayOfWeek
@@ -247,6 +252,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** Only months **1, 2, 3, 4, 5, and 11** have recorded data — the remaining months are absent entirely. This is a direct consequence of the dataset's narrow date range: the 2016 records are concentrated in early-to-mid year. **May (Month 5)** dominates the heatmap with the highest cell values, particularly on Tuesday and Wednesday, meaning the majority of this dataset's incidents occurred in May 2016 on those two weekdays. No summer-peak or weekend-peak pattern can be reliably concluded from this incomplete month coverage.")
 
     # UC2 Row 3: Task 5 Top 10 Community Areas
     if comm_res:
@@ -266,6 +272,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
         plt.tight_layout()
         st.pyplot(fig)
         plt.close()
+        st.caption("📌 **Insight:** The top 10 community areas account for a disproportionate share of total crime. The leading communities are concentrated on Chicago's South and West sides — historically underserved areas with higher poverty rates and unemployment, reinforcing the socioeconomic link to crime concentration.")
 
     st.divider()
 
@@ -301,6 +308,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
         plt.tight_layout()
         st.pyplot(fig)
         plt.close()
+        st.caption("📌 **Insight:** **100% of records spike at midnight (00:00:00)** because the source CSV stores only dates with no time component — the time defaults to midnight on import. This is a data-quality artifact, not a real crime pattern. No meaningful hourly analysis is possible without raw HH:MM data.")
 
     with col_u3_2:
         if daily_res:
@@ -327,6 +335,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** Days **3 and 4** show the highest incident counts, while **Day 31** naturally drops. The distribution is relatively uniform across the month — no strong days-of-month pattern emerges, suggesting crimes are not clustered around paydays or other calendar events.")
 
     # UC3 Task 2: Community Area IQR Box Plot & Outliers
     if comm_res:
@@ -357,6 +366,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
+            st.caption("📌 **Insight:** The IQR box spans roughly **3 to 9 crimes** per community area with a median of ~5–6, and whiskers extend out to ~16 — meaning the **majority of Chicago community areas recorded between 1 and 16 crimes**. The upper IQR fence sits at **18.0**. Only **3 community areas** cross that threshold and appear as red outlier dots: two at ~20 crimes and one at ~34 crimes. Those two communities are statistically anomalous — not just above average, but mathematically extreme relative to the rest of the city.")
 
         with col_u3_4:
             if outliers:
@@ -376,6 +386,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
                 plt.tight_layout()
                 st.pyplot(fig)
                 plt.close()
+                st.caption("📌 **Insight:** The outlier communities sit **well above the IQR upper fence**, confirming they are statistically anomalous, not just above-average. These are genuine crime hotspots requiring targeted policing strategy. The gap between the top outlier and the upper fence quantifies how extreme the concentration is.")
 
     # UC3 Task 3: Cross-Correlation Matrix
     if corr_res:
@@ -406,6 +417,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
         plt.tight_layout()
         st.pyplot(fig)
         plt.close()
+        st.caption("📌 **Insight:** The dominant correlations are entirely **geographic and administrative** — not behavioral. `district_code` ↔ `beat_num` = **1.00** (beats are defined sub-units of districts, so they move in perfect lockstep). `latitude` ↔ `y_coordinate` = **1.00** (same geographic position in two coordinate systems). `community_code` ↔ `y_coordinate` = **−0.74** (northern Chicago communities carry lower code numbers — a city-numbering convention). Most importantly, **`arrest` correlates near-zero with every single feature** (highest is `Day` at 0.19, `Month` at −0.18) — meaning no geographic or temporal variable in this dataset can predict whether an arrest will be made. Arrest outcome appears essentially random with respect to location and time.")
 
         col_p1, col_p2 = st.columns(2)
         with col_p1:
@@ -492,6 +504,7 @@ if nav_choice == "📊 Full Analytics Dashboard":
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         st.pyplot(fig)
         plt.close()
+        st.caption("📌 **Insight (UC4 Views):** The SQL views aggregate consistently with the raw table. Panel 1 confirms 2016's volume dominance. Panel 2 shows the **2016 arrest rate (~24%)** is the most reliable figure. Panel 3 reaffirms Theft as the top category. Panel 4 reveals **Narcotics has a disproportionately high arrest rate (~60–70%)** — likely because narcotics possession is a direct-arrest offense, unlike theft where suspects often flee.")
 
 
 # ==============================================================================
