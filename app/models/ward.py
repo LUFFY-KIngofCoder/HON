@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import relationship
 
 try:
     from app.db.database import Base
@@ -31,3 +32,5 @@ class WardOffice(Base):
     city_hall_state   = Column(String(10), nullable=True)
     city_hall_zipcode = Column(Integer, nullable=True)
     city_hall_phone   = Column(String(50), nullable=True)
+
+    crimes = relationship("ChicagoCrime", back_populates="ward_office")

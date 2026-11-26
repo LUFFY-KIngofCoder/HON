@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer
+from sqlalchemy.orm import relationship
 
 try:
     from app.db.database import Base
@@ -18,3 +19,5 @@ class PoliceBeatInfo(Base):
     district = Column(Integer, nullable=False, index=True)
     sector   = Column(Integer, nullable=False)
     beat     = Column(Integer, nullable=False)
+
+    crimes = relationship("ChicagoCrime", back_populates="beat")

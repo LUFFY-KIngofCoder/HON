@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import relationship
 
 try:
     from app.db.database import Base
@@ -29,3 +30,5 @@ class DistrictPSInfo(Base):
     latitude      = Column(Float, nullable=True)
     longitude     = Column(Float, nullable=True)
     location      = Column(String(100), nullable=True)
+
+    crimes = relationship("ChicagoCrime", back_populates="district")

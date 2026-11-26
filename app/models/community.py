@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import relationship
 
 try:
     from app.db.database import Base
@@ -16,8 +17,10 @@ class CityCommunity(Base):
 
     community_code   = Column(Integer, primary_key=True, index=True)
     community_name   = Column(String(100), nullable=False, index=True)
-    population       = Column(String(50), nullable=True)
+    population       = Column(Integer, nullable=True)
     area_sqmile      = Column(Float, nullable=True)
     area_sqkm        = Column(Float, nullable=True)
-    density_per_sqmi = Column(String(50), nullable=True)
-    density_per_sqkm = Column(String(50), nullable=True)
+    density_per_sqmi = Column(Float, nullable=True)
+    density_per_sqkm = Column(Float, nullable=True)
+
+    crimes = relationship("ChicagoCrime", back_populates="community")

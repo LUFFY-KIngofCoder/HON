@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 
 try:
     from app.db.database import Base
@@ -18,3 +19,5 @@ class IUCRCode(Base):
     primary_type = Column(String(100), nullable=False, index=True)
     description  = Column(String(255), nullable=False)
     index_code   = Column(String(10), nullable=True)
+
+    crimes = relationship("ChicagoCrime", back_populates="iucr")
