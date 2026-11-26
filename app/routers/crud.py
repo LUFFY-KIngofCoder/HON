@@ -1,18 +1,3 @@
-"""
-CRUD Router — full Create / Read / Update / Delete for all 6 tables.
-Mounted at /api/tables/{table_name}.
-
-Supported tables:
-  chicago_crime     → PK: id  (int)
-  iucr_codes        → PK: iucr (str)
-  city_community    → PK: community_code (int)
-  district_ps_info  → PK: district_code (int)
-  police_beat_info  → PK: beat_num (int)
-  ward_office       → PK: ward (int)
-"""
-
-from __future__ import annotations
-
 from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session

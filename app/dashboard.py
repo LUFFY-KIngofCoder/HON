@@ -114,26 +114,26 @@ if nav_choice == "📊 Full Analytics Dashboard":
     corr_res = fetch_api("/api/analytics/correlation")
 
     # --------------------------------------------------------------------------
-    # SECTION 2: ANNUAL CRIME TREND & DATASET SKEW (UC1 Q2 & UC2 Task 1)
+    # USE CASE 1: LOAD AND CLEAN CHICAGO CRIME DATA (Q2 Date Skew & Outliers)
     # --------------------------------------------------------------------------
-    st.markdown("### 📅 Section 1 — Annual Crime Trend & Distribution Skew")
+    st.markdown("### 📦 Use Case 1 — Load & Clean Chicago Crime Data (Date Distribution & Skew)")
     col_t1, col_t2 = st.columns(2)
 
     with col_t1:
-        # UC2 Task 1: Trend line plot
+        # UC1 Question 2: Yearly Histogram
         if yearly_data:
             df_y = pd.DataFrame(yearly_data)
-            fig, ax = plt.subplots(figsize=(8, 4.2))
-            ax.plot(df_y['year'], df_y['total_crimes'], marker='o', color='#1f77b4', linewidth=2.5, markersize=8)
-            for _, r in df_y.iterrows():
-                pct = r['total_crimes'] / df_y['total_crimes'].sum() * 100
-                ax.annotate(f"{int(r['total_crimes'])}\n({pct:.1f}%)", (r['year'], r['total_crimes']),
-                            textcoords='offset points', xytext=(0, 8), ha='center', fontweight='bold', fontsize=9)
-            ax.set_title("Annual Incident Progression (2012–2016)", fontweight='bold')
+            fig, ax = plt.subplots(figsize=(8, 4.5))
+            bars_hist = ax.bar(df_y['year'].astype(str), df_y['total_crimes'], color='steelblue', edgecolor='black', width=0.65)
+            for bar in bars_hist:
+                h = bar.get_height()
+                ax.annotate(f"{int(h)}", (bar.get_x() + bar.get_width()/2, h + 8), ha='center', fontweight='bold', fontsize=9.5)
+            ax.set_title("Distribution of Incidents by Year (Histogram)", fontweight='bold', fontsize=12, pad=10)
             ax.set_xlabel("Year")
-            ax.set_ylabel("Reported Incidents")
-            ax.set_xticks(df_y['year'])
-            ax.grid(True, linestyle='--', alpha=0.5)
+            ax.set_ylabel("Frequency (Number of Incidents)")
+            ax.set_ylim(0, df_y['total_crimes'].max() * 1.15)
+            ax.grid(axis='y', linestyle='--', alpha=0.5)
+            plt.tight_layout()
             st.pyplot(fig)
             plt.close()
 
@@ -144,14 +144,15 @@ if nav_choice == "📊 Full Analytics Dashboard":
             years_expanded = []
             for _, r in df_y.iterrows():
                 years_expanded.extend([r['year']] * int(r['total_crimes']))
-            fig, ax = plt.subplots(figsize=(8, 4.2))
+            fig, ax = plt.subplots(figsize=(8, 4.5))
             ax.boxplot(years_expanded, vert=False, patch_artist=True,
                        boxprops=dict(facecolor='lightblue', color='navy'),
                        medianprops=dict(color='red', linewidth=2.5))
-            ax.set_title("Year Box Plot (Empirical Proof of 2016 Skew)", fontweight='bold')
+            ax.set_title("Year Box Plot (Empirical Proof of 2016 Skew)", fontweight='bold', fontsize=12, pad=10)
             ax.set_xlabel("Year")
             ax.set_yticks([])
             ax.grid(axis='x', linestyle='--', alpha=0.5)
+            plt.tight_layout()
             st.pyplot(fig)
             plt.close()
 
@@ -159,35 +160,58 @@ if nav_choice == "📊 Full Analytics Dashboard":
     st.divider()
 
     # --------------------------------------------------------------------------
-    # SECTION 3: CRIME CATEGORIES & ARREST OUTCOMES (UC2 Tasks 2 & 3)
+    # USE CASE 2: EXPLORATORY ANALYSIS & VISUALIZATION OF CRIME
     # --------------------------------------------------------------------------
-    st.markdown("### 🏷️ Section 2 — Crime Categories & Arrest Outcomes")
-    col_c1, col_c2 = st.columns(2)
+    st.markdown("### 📊 Use Case 2 — Exploratory Analysis & Visualization of Crime")
 
-    with col_c1:
+    # UC2 Row 1: Annual Crime Trend & Top 10 Categories
+    col_u2_1, col_u2_2 = st.columns(2)
+    with col_u2_1:
+        if yearly_data:
+            df_y = pd.DataFrame(yearly_data)
+            fig, ax = plt.subplots(figsize=(8, 5.2))
+            ax.plot(df_y['year'], df_y['total_crimes'], marker='o', color='#1f77b4', linewidth=2.5, markersize=8)
+            for _, r in df_y.iterrows():
+                pct = r['total_crimes'] / df_y['total_crimes'].sum() * 100
+                ax.annotate(f"{int(r['total_crimes'])}\n({pct:.1f}%)", (r['year'], r['total_crimes']),
+                            textcoords='offset points', xytext=(0, 8), ha='center', fontweight='bold', fontsize=9)
+            ax.set_title("Task 1: Annual Crime Trend (2012–2016)", fontweight='bold', fontsize=12, pad=12)
+            ax.set_xlabel("Year")
+            ax.set_ylabel("Reported Incidents")
+            ax.set_xticks(df_y['year'])
+            ax.set_ylim(0, df_y['total_crimes'].max() * 1.18)
+            ax.grid(True, linestyle='--', alpha=0.5)
+            plt.tight_layout()
+            st.pyplot(fig)
+            plt.close()
+
+    with col_u2_2:
         # UC2 Task 2: Top 10 Crime Types Horizontal Bar
         if cat_data:
             df_c = pd.DataFrame(cat_data).sort_values("crime_count", ascending=True)
-            fig, ax = plt.subplots(figsize=(8, 4.5))
+            fig, ax = plt.subplots(figsize=(8, 5.2))
             palette = sns.color_palette("Blues_r", len(df_c))
             bars = ax.barh(df_c['primary_type'], df_c['crime_count'], color=palette[::-1], edgecolor='black')
             for bar, pct in zip(bars, df_c['pct_of_total']):
                 w_val = bar.get_width()
                 ax.annotate(f"{int(w_val)} ({pct:.1f}%)", (w_val, bar.get_y() + bar.get_height()/2),
                             xytext=(5, 0), textcoords="offset points", va="center", fontsize=8.5, fontweight='bold')
-            ax.set_title("Top 10 Crime Categories by Frequency (Primary Type)", fontweight='bold')
-            ax.set_xlabel("Number of Incidents")
+            ax.set_title("Task 2: Top 10 Crime Categories (Primary Type)", fontweight='bold', fontsize=12, pad=12)
+            ax.set_xlabel("Number of Incidents", fontsize=10)
             ax.set_xlim(0, df_c['crime_count'].max() * 1.25)
             ax.grid(axis='x', linestyle='--', alpha=0.5)
+            plt.tight_layout()
             st.pyplot(fig)
             plt.close()
 
-    with col_c2:
+    # UC2 Row 2: Arrest Outcome Donut & Month vs DayOfWeek Heatmap
+    col_u2_3, col_u2_4 = st.columns(2)
+    with col_u2_3:
         # UC2 Task 3: Arrest Outcome Donut Chart
         if kpis:
             tot_arr = kpis['total_arrests']
             tot_no = kpis['total_incidents'] - tot_arr
-            fig, ax = plt.subplots(figsize=(8, 4.5))
+            fig, ax = plt.subplots(figsize=(8, 5.2))
             wedges, texts, autotexts = ax.pie(
                 [tot_arr, tot_no],
                 labels=['Arrest Made', 'No Arrest'],
@@ -195,39 +219,90 @@ if nav_choice == "📊 Full Analytics Dashboard":
                 startangle=140,
                 colors=['#2ca02c', '#d62728'],
                 explode=(0.06, 0),
-                wedgeprops=dict(width=0.6, edgecolor='black')
+                wedgeprops=dict(width=0.6, edgecolor='black'),
+                textprops=dict(fontsize=10)
             )
             for autotext in autotexts:
                 autotext.set_fontweight('bold')
                 autotext.set_fontsize(11)
-            ax.set_title(f"Overall Arrest Rate: {kpis['arrest_rate_pct']:.2f}% ({tot_arr} / {kpis['total_incidents']})", fontweight='bold')
+            ax.set_title(f"Task 3: Overall Arrest Rate: {kpis['arrest_rate_pct']:.2f}%\n({tot_arr} / {kpis['total_incidents']})", fontweight='bold', fontsize=12, pad=12)
+            # Lock the pie to a fixed radius so it never expands to fill the full canvas
+            ax.set_xlim(-1.35, 1.35)
+            ax.set_ylim(-1.35, 1.35)
+            plt.tight_layout()
             st.pyplot(fig)
             plt.close()
 
-    st.divider()
-
-    # --------------------------------------------------------------------------
-    # SECTION 4: TEMPORAL HEATMAP & INTENSITY (UC2 Task 4 & UC3 Task 1)
-    # --------------------------------------------------------------------------
-    st.markdown("### 🗓️ Section 3 — Temporal Crime Dynamics & Patrol Intensity")
-    col_h1, col_h2 = st.columns(2)
-
-    with col_h1:
+    with col_u2_4:
         # UC2 Task 4: Heatmap Month vs DayOfWeek
         if heat_data:
             df_heat = pd.DataFrame(heat_data)
             days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
             pivot = df_heat.pivot(index='DayOfWeek', columns='Month', values='crime_count').reindex(days_order).fillna(0)
-            fig, ax = plt.subplots(figsize=(8, 4.8))
+            fig, ax = plt.subplots(figsize=(8, 5.0))
             sns.heatmap(pivot, cmap="YlOrRd", annot=True, fmt=".0f", cbar_kws={'label': 'Incidents'}, ax=ax)
-            ax.set_title("Crime Frequency Heatmap — Month vs. Day of Week", fontweight='bold')
+            ax.set_title("Task 4: Crime Frequency Heatmap (Month vs. Day)", fontweight='bold', fontsize=12, pad=12)
             ax.set_xlabel("Month of Year")
             ax.set_ylabel("Day of Week")
+            plt.tight_layout()
             st.pyplot(fig)
             plt.close()
 
-    with col_h2:
-        # UC3 Task 1: 31-Day Calendar Intensity Bar Chart
+    # UC2 Row 3: Task 5 Top 10 Community Areas
+    if comm_res:
+        df_comm = pd.DataFrame(comm_res['top']).sort_values("crime_count", ascending=True)
+        fig, ax = plt.subplots(figsize=(14, 4.5))
+        palette = sns.color_palette('Blues_r', len(df_comm))
+        bars = ax.barh(df_comm['community_name'], df_comm['crime_count'], color=palette[::-1], edgecolor='black')
+        for bar in bars:
+            w = bar.get_width()
+            pct = w / kpis['total_incidents'] * 100 if kpis else 0
+            ax.annotate(f"{int(w)} ({pct:.1f}%)", (w + 0.5, bar.get_y() + bar.get_height()/2),
+                        va='center', ha='left', fontsize=8.5, fontweight='bold')
+        ax.set_title("Task 5: Top 10 Chicago Community Areas with Highest Crime", fontweight='bold', fontsize=12, pad=10)
+        ax.set_xlabel("Number of Incidents")
+        ax.set_xlim(0, df_comm['crime_count'].max() + 5)
+        ax.grid(axis='x', linestyle='--', alpha=0.5)
+        plt.tight_layout()
+        st.pyplot(fig)
+        plt.close()
+
+    st.divider()
+
+    # --------------------------------------------------------------------------
+    # USE CASE 3: STATISTICAL INSIGHTS & PATTERN DETECTION
+    # --------------------------------------------------------------------------
+    st.markdown("### 📈 Use Case 3 — Statistical Insights & Pattern Detection")
+
+    # UC3 Task 1: 24-Hour & 31-Day Temporal Distribution
+    col_u3_1, col_u3_2 = st.columns(2)
+    with col_u3_1:
+        hourly_counts = np.zeros(24)
+        hourly_counts[0] = kpis['total_incidents'] if kpis else 497
+        fig, ax_h = plt.subplots(figsize=(8, 4.6))
+        ax_h.fill_between(range(24), hourly_counts, color='#1f77b4', alpha=0.25)
+        ax_h.plot(range(24), hourly_counts, marker='o', linewidth=2.5, color='#1f77b4', markersize=5, label='Crimes / Hour')
+        ax_h.axvline(x=0, color='red', linestyle='--', linewidth=1.5, label='Midnight Spike (100%)')
+        ax_h.annotate(
+            '100% at 00:00:00\n(No HH:MM in CSV)',
+            xy=(0, hourly_counts[0]),
+            xytext=(3, hourly_counts[0] * 0.8),
+            arrowprops=dict(facecolor='red', shrink=0.08, width=1.5, headwidth=7),
+            fontweight='bold', fontsize=9, color='darkred'
+        )
+        ax_h.set_title('Task 1a: Hourly Crime Intensity (00:00–23:00)', fontweight='bold', fontsize=12, pad=10)
+        ax_h.set_xlabel('Hour of Day')
+        ax_h.set_ylabel('Reported Crimes')
+        ax_h.set_xticks(range(0, 24, 3))
+        ax_h.set_xticklabels([f'{h:02d}:00' for h in range(0, 24, 3)])
+        ax_h.set_ylim(-15, max(hourly_counts) * 1.15)
+        ax_h.grid(True, linestyle='--', alpha=0.5)
+        ax_h.legend(loc='upper right')
+        plt.tight_layout()
+        st.pyplot(fig)
+        plt.close()
+
+    with col_u3_2:
         if daily_res:
             df_day = pd.DataFrame(daily_res['data'])
             daily_series = pd.Series(0, index=range(1, 32))
@@ -235,81 +310,33 @@ if nav_choice == "📊 Full Analytics Dashboard":
                 if 1 <= int(r['Day']) <= 31:
                     daily_series[int(r['Day'])] = r['crime_count']
 
-            fig, ax = plt.subplots(figsize=(8, 4.8))
+            fig, ax = plt.subplots(figsize=(8, 4.6))
             ax.bar(daily_series.index, daily_series.values, color='#2ca02c', edgecolor='black', alpha=0.8, width=0.75)
             ax.plot(daily_series.index, daily_series.values, color='darkgreen', marker='o', linewidth=1.8, markersize=4)
             for d in [3, 4, 1]:
                 if d in daily_series and daily_series[d] > 0:
                     cnt = daily_series[d]
                     ax.text(d, cnt + 7, f'Day {d}\n({cnt})', ha='center', va='bottom', fontweight='bold', fontsize=8.5)
-            ax.set_title("Daily Crime Distribution Across Month (Days 1 to 31)", fontweight='bold')
+            ax.set_title("Task 1b: Daily Crime Distribution (Days 1–31)", fontweight='bold', fontsize=12, pad=10)
             ax.set_xlabel("Day of Month (1 to 31)")
             ax.set_ylabel("Reported Crimes")
             ax.set_xticks(range(1, 32, 2))
             ax.set_xlim(0, 32)
+            ax.set_ylim(0, max(daily_series.values) * 1.18)
             ax.grid(axis='y', linestyle='--', alpha=0.5)
+            plt.tight_layout()
             st.pyplot(fig)
             plt.close()
 
-    # UC3 Task 1 Upper: 24-Hour Line Plot
-    st.markdown("#### ⏰ 24-Hour Intensity Profile & Dataset Timestamp Limitation")
-    hourly_counts = np.zeros(24)
-    hourly_counts[0] = kpis['total_incidents'] if kpis else 497
-    fig, ax_h = plt.subplots(figsize=(14, 3.8))
-    ax_h.fill_between(range(24), hourly_counts, color='#1f77b4', alpha=0.25)
-    ax_h.plot(range(24), hourly_counts, marker='o', linewidth=2.5, color='#1f77b4', markersize=6, label='Crimes / Hour')
-    ax_h.axvline(x=0, color='red', linestyle='--', linewidth=1.5, label='Midnight Spike (100%)')
-    ax_h.annotate(
-        '100% of rows at 00:00:00 (No HH:MM in raw CSV extract)',
-        xy=(0, hourly_counts[0]),
-        xytext=(2, hourly_counts[0] * 0.85),
-        arrowprops=dict(facecolor='red', shrink=0.08, width=1.5, headwidth=7),
-        fontweight='bold', fontsize=10, color='darkred'
-    )
-    ax_h.set_title('Hourly Crime Intensity (00:00 to 23:00)', fontweight='bold')
-    ax_h.set_xlabel('Hour of Day (00:00 = Midnight)')
-    ax_h.set_ylabel('Reported Crimes')
-    ax_h.set_xticks(range(0, 24, 2))
-    ax_h.set_xticklabels([f'{h:02d}:00' for h in range(0, 24, 2)])
-    ax_h.set_ylim(-15, max(hourly_counts) * 1.15)
-    ax_h.grid(True, linestyle='--', alpha=0.5)
-    ax_h.legend(loc='upper right')
-    st.pyplot(fig)
-    plt.close()
-    st.divider()
-
-    # --------------------------------------------------------------------------
-    # SECTION 5: COMMUNITY HOTSPOTS & STATISTICAL OUTLIERS (UC2 Task 5 & UC3 Task 2)
-    # --------------------------------------------------------------------------
-    st.markdown("### 🏘️ Section 4 — Community Area Hotspots & IQR Statistical Outlier Detection")
+    # UC3 Task 2: Community Area IQR Box Plot & Outliers
     if comm_res:
         stats = comm_res['stats']
         counts = comm_res.get('all_counts', [])
         outliers = comm_res.get('outliers', [])
 
-        col_m1, col_m2 = st.columns(2)
-
-        with col_m1:
-            # UC2 Task 5: Top 10 Community Areas
-            df_comm = pd.DataFrame(comm_res['top']).sort_values("crime_count", ascending=True)
-            fig, ax = plt.subplots(figsize=(8, 4.6))
-            palette = sns.color_palette('Blues_r', len(df_comm))
-            bars = ax.barh(df_comm['community_name'], df_comm['crime_count'], color=palette[::-1], edgecolor='black')
-            for bar in bars:
-                w = bar.get_width()
-                pct = w / kpis['total_incidents'] * 100 if kpis else 0
-                ax.annotate(f"{int(w)} ({pct:.1f}%)", (w + 0.5, bar.get_y() + bar.get_height()/2),
-                            va='center', ha='left', fontsize=8.5, fontweight='bold')
-            ax.set_title("Top 10 Chicago Community Areas with Highest Crime", fontweight='bold')
-            ax.set_xlabel("Number of Incidents")
-            ax.set_xlim(0, df_comm['crime_count'].max() + 5)
-            ax.grid(axis='x', linestyle='--', alpha=0.5)
-            st.pyplot(fig)
-            plt.close()
-
-        with col_m2:
-            # UC3 Task 2: Box Plot of Community Crime Values
-            fig, ax = plt.subplots(figsize=(8, 4.6))
+        col_u3_3, col_u3_4 = st.columns(2)
+        with col_u3_3:
+            fig, ax = plt.subplots(figsize=(8, 4.5))
             if counts:
                 ax.boxplot(
                     counts,
@@ -322,43 +349,40 @@ if nav_choice == "📊 Full Analytics Dashboard":
                     flierprops=dict(marker='o', markerfacecolor='red', markeredgecolor='black', markersize=7)
                 )
             ax.axvline(stats['upper_fence'], color='darkorange', linestyle='--', linewidth=1.5, label=f"Upper Fence ({stats['upper_fence']:.1f})")
-            ax.set_title("Box Plot of Crimes per Community Area (IQR Fence)", fontweight='bold')
+            ax.set_title("Task 2a: Community Area Crime Box Plot (IQR)", fontweight='bold', fontsize=12, pad=10)
             ax.set_xlabel("Number of Recorded Crimes")
             ax.set_yticks([])
             ax.grid(axis='x', linestyle='--', alpha=0.5)
             ax.legend(loc='upper right')
+            plt.tight_layout()
             st.pyplot(fig)
             plt.close()
 
-        # Outlier threshold horizontal bar comparison
-        if outliers:
-            plot_names = [o['community_name'] for o in outliers] + ['Upper Fence', 'Community Mean']
-            plot_vals = [o['crime_count'] for o in outliers] + [stats['upper_fence'], stats['mean']]
-            bar_colors = ['#d62728', '#e377c2', '#e377c2', 'darkorange', '#1f77b4'][:len(plot_names)]
+        with col_u3_4:
+            if outliers:
+                plot_names = [o['community_name'] for o in outliers] + ['Upper Fence', 'Community Mean']
+                plot_vals = [o['crime_count'] for o in outliers] + [stats['upper_fence'], stats['mean']]
+                bar_colors = ['#d62728', '#e377c2', '#e377c2', 'darkorange', '#1f77b4'][:len(plot_names)]
 
-            fig, ax_out = plt.subplots(figsize=(14, 3.8))
-            bars = ax_out.barh(plot_names[::-1], plot_vals[::-1], color=bar_colors[::-1], edgecolor='black')
-            for bar in bars:
-                ax_out.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height()/2, f'{bar.get_width():.1f}',
-                            va='center', ha='left', fontweight='bold', fontsize=9.5)
-            ax_out.set_title("Statistical Outliers vs. IQR Upper Fence & Mean (Austin, Near North Side, Humboldt Park)", fontweight='bold')
-            ax_out.set_xlabel("Crime Count / Threshold")
-            ax_out.set_xlim(0, max(plot_vals) + 5)
-            ax_out.grid(axis='x', linestyle='--', alpha=0.5)
-            st.pyplot(fig)
-            plt.close()
+                fig, ax_out = plt.subplots(figsize=(8, 4.5))
+                bars = ax_out.barh(plot_names[::-1], plot_vals[::-1], color=bar_colors[::-1], edgecolor='black')
+                for bar in bars:
+                    ax_out.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height()/2, f'{bar.get_width():.1f}',
+                                va='center', ha='left', fontweight='bold', fontsize=9.5)
+                ax_out.set_title("Task 2b: Statistical Outliers vs. IQR Upper Fence", fontweight='bold', fontsize=12, pad=10)
+                ax_out.set_xlabel("Crime Count / Threshold")
+                ax_out.set_xlim(0, max(plot_vals) + 5)
+                ax_out.grid(axis='x', linestyle='--', alpha=0.5)
+                plt.tight_layout()
+                st.pyplot(fig)
+                plt.close()
 
-    st.divider()
-
-    # --------------------------------------------------------------------------
-    # SECTION 6: CROSS-CORRELATION MATRIX (UC3 Task 3)
-    # --------------------------------------------------------------------------
-    st.markdown("### 🔗 Section 5 — Crime Feature Pairwise Cross-Correlation Matrix")
+    # UC3 Task 3: Cross-Correlation Matrix
     if corr_res:
         corr_cols = corr_res['columns']
         corr_mat = np.array(corr_res['matrix'])
 
-        fig, ax_corr = plt.subplots(figsize=(11, 7.5))
+        fig, ax_corr = plt.subplots(figsize=(11, 7.2))
         mask = np.triu(np.ones_like(corr_mat, dtype=bool))
         sns.heatmap(
             corr_mat,
@@ -376,9 +400,10 @@ if nav_choice == "📊 Full Analytics Dashboard":
             cbar_kws={'shrink': 0.8, 'label': 'Pearson Correlation (r)'},
             ax=ax_corr
         )
-        ax_corr.set_title("Crime Feature Pairwise Cross-Correlation Matrix (Lower Triangle)", fontweight='bold')
+        ax_corr.set_title("Task 3: Crime Feature Pairwise Cross-Correlation Matrix", fontweight='bold', fontsize=12, pad=10)
         plt.xticks(rotation=45, ha='right', fontsize=9)
         plt.yticks(fontsize=9)
+        plt.tight_layout()
         st.pyplot(fig)
         plt.close()
 
@@ -393,9 +418,9 @@ if nav_choice == "📊 Full Analytics Dashboard":
     st.divider()
 
     # --------------------------------------------------------------------------
-    # SECTION 7: 2×2 SQL STORED VIEWS DASHBOARD (UC4 Task 5)
+    # USE CASE 4: SQL STORED VIEWS DASHBOARD
     # --------------------------------------------------------------------------
-    st.markdown("### 🗄️ Section 6 — SQL Database Stored Views (Use Case 4)")
+    st.markdown("### 🗄️ Use Case 4 — SQL Database Stored Views (`vw_crime_yearly` & `vw_crime_by_category`)")
     st.markdown("Reporting grid directly querying persistent SQLite views `vw_crime_yearly` and `vw_crime_by_category`.")
 
     if yearly_data and cat_data:
@@ -543,16 +568,8 @@ elif nav_choice == "🗄️ Relational Data Management":
             
             if rows:
                 df_display = pd.DataFrame(rows)
-                st.dataframe(df_display, use_container_width=True, height=450)
+                st.dataframe(df_display, width='stretch', height=450)
                 
-                # CSV Export
-                csv = df_display.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="📥 Export Current View as CSV",
-                    data=csv,
-                    file_name=f"{table_name}_export.csv",
-                    mime="text/csv"
-                )
             else:
                 st.info("No matching records found for the applied search/filter criteria.")
 

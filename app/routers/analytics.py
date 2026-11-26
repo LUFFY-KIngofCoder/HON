@@ -1,9 +1,3 @@
-"""
-Analytics Router — read-only endpoints that power the Dashboard.
-Queries vw_crime_yearly, vw_crime_by_category, and chicago_crime directly.
-"""
-
-from __future__ import annotations
 import numpy as np
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
